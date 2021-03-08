@@ -12,6 +12,7 @@ Required libraries:
 ## How to install: 
 ``` shell
 pipenv install
+copy .env.example .env
 ```
 ## How to run:
 ``` shell
