@@ -1,9 +1,13 @@
-import requests
 import matplotlib.pyplot as plt
+import numpy as np
+import requests
 from dotenv import dotenv_values
+
 # Load variables from .env and return them in a variable
 config = dotenv_values(".env")
-CURRENT_PRICE = "https://www.binance.com/api/v3/ticker/price"
+CURRENT_PRICE = "https://www.binance.com/api/v3/ticker/price"  # You should not change this.
+# The max percentage of the potential profit
+LIMIT = 500
 
 
 def gain(current_price, x):
@@ -18,7 +22,6 @@ def main():
     # Make sure your only FIAT currency is Euro.
     euro = raising_price = crypto_price = raising_crypto = current_price = 0
 
-    print(symbol_prices)
     for symbol in config:
         if any(symbol == sublist['symbol'] for sublist in symbol_prices):
             for price in symbol_prices:
@@ -36,24 +39,27 @@ def main():
         else:
             euro += float(config[symbol])
 
-    percentage = [i for i in range(1, 1001)]
+    # Calculations
+    percentage = [i for i in range(1, LIMIT + 1)]
     percentage_price = [gain(current_price, x) for x in percentage]
-    # percentage_price = [current_price / 100 * x for x in range(100, 1101)]
     percentage_raised_price = [raising_crypto * x for x in percentage_price]
-
-    print(percentage_price)
-    print(percentage_raised_price)
-    plt.plot(percentage, percentage_raised_price)
-    plt.show()
-    # print(percentage_price)
-    print(crypto_price)
+    percentage_total_price = [(raising_crypto * x) + crypto_price + euro for x in percentage_price]
     total_price = crypto_price + raising_price + euro
     total_profit = total_price - float(beginamount)
 
-    print(current_price)
-    # print(total_price)
-    print(total_profit)
-    print(raising_crypto)
+    # Set title and labels
+    plt.title(f"CryptoProfit €{round(total_profit, 2)} (€{round(total_price, 2)} - €{round(float(beginamount), 2)})")
+    plt.xlabel("Profit in €")
+    plt.ylabel("Raised percentage in %")
+    # Plot lines
+    plt.plot(percentage_raised_price, percentage, label=f"{raising} profit")
+    plt.plot(percentage_total_price, percentage, label="Total profit")
+    # Make ticks smaller
+    plt.xticks(np.arange(0, max(percentage_raised_price) + 1, 200))
+    plt.yticks(np.arange(0, max(percentage), 100))
+    # Show legend and chart
+    plt.legend()
+    plt.show()
 
 
 if __name__ == '__main__':
